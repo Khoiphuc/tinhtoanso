@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Toán số</title>
+    <link rel="icon" href="/img/icon-webs.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            /* Thêm để reset margin mặc định */
+        }
+
+        .open-menu-button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px;
+            display: block;
+        }
+
+        .modal {
+            /* display: none;  Xóa dòng này */
+            visibility: hidden;
+            /* Ẩn modal ban đầu và không cho tương tác */
+            opacity: 0;
+            /* Làm cho modal trong suốt ban đầu */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Transition cho hiệu ứng mờ dần của nền */
+            transition: opacity 0.3s ease-out, visibility 0s linear 0.3s;
+            /* visibility sẽ thay đổi sau khi opacity transition hoàn tất */
+        }
+
+        .modal.active {
+            /* Lớp active để kích hoạt hiển thị modal */
+            visibility: visible;
+            opacity: 1;
+            transition-delay: 0s;
+            /* Reset transition-delay khi active */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 320px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+
+            position: absolute;
+            /* Sử dụng absolute để định vị */
+            left: 50%;
+            bottom: 0;
+            /* Bắt đầu từ dưới cùng */
+            transform: translate(-50%, 100%);
+            /* Dịch chuyển xuống dưới và căn giữa ngang */
+            /* Transition cho hiệu ứng trượt từ dưới lên */
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            /* Thử nghiệm với cubic-bezier để mượt hơn */
+        }
+
+        .modal.active .modal-content {
+            /* Khi modal active, đưa modal-content lên vị trí mong muốn */
+            /* top: 50%; transform: translate(-50%, -50%);  Cách này sẽ đưa lên giữa màn hình */
+            /* Để nó hiện ở dưới và chạy lên, rồi dừng ở khoảng cách nhất định từ dưới */
+            bottom: 20px;
+            /* Hoặc một giá trị % như 5% */
+            transform: translate(-50%, 0);
+            /* Chỉ cần căn giữa ngang, không cần dịch chuyển Y nữa */
+        }
+
+        .modal-header {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-button {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .button-containerk {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            /* Điều chỉnh max-height cho phù hợp, ví dụ trừ đi chiều cao header và padding */
+            max-height: calc(70vh - 80px);
+            padding-right: 10px;
+            margin-right: -10px;
+            /* Bù padding để thanh cuộn không làm lệch nội dung */
+        }
+
+        .button-containerk::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .button-containerk::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .button-containerk::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .button-containerk::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .nav-button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 8px 0;
+            transition: background-color 0.3s;
+            /* Chỉ transition background-color */
+            width: calc(100% - 10px);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .nav-button:hover {
+            background-color: #0056b3;
+        }
+
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Toán học Ứng dụng</h1>
+
+    <button class="open-menu-button" id="openMenuBtn">Mở Menu Tính Năng</button>
+    <div style="display: flex; justify-content: center;">
+        <img src="/img/icon-web.png" alt="logo" height="250">
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Menu</h2>
+                <span class="close-button" id="closeBtn">&times;</span>
+            </div>
+            <div class="button-containerk">
+                <button class="nav-button" onclick="location.href='/ppt/ptNewton.html'">Giải Phương trình</button>
+                <button class="nav-button" onclick="location.href='/ppt/ppSeidel-Gauss.html'">Giải Hệ 3 pt</button>
+                <button class="nav-button" onclick="location.href='/ppt/bpct.html'">PP Bình phương cực tiểu</button>
+                <button class="nav-button" onclick="location.href='/ppt/tpSimpson.html'">Tính Tích phân</button>
+                <button class="nav-button" onclick="location.href='/ppt/ptvp.html'">Phương trình vi phân</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var modal = document.getElementById("myModal");
+        var btnOpen = document.getElementById("openMenuBtn");
+        var btnClose = document.getElementById("closeBtn");
+
+        btnOpen.onclick = function () {
+            modal.classList.add("active"); // Thêm class active để hiển thị modal và kích hoạt animation
+        }
+
+        btnClose.onclick = function () {
+            modal.classList.remove("active"); // Xóa class active để ẩn modal
+        }
+
+        // Đóng modal khi click ra ngoài vùng .modal-content (tức là click vào .modal)
+        modal.onclick = function (event) {
+            if (event.target === modal) { // Chỉ đóng khi click trực tiếp vào lớp .modal (vùng nền mờ)
+                modal.classList.remove("active");
+            }
+        }
+    </script>
+
+</body>
+
+</html>

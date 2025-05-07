@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improved Euler Method Calculator</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f7fa;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            position: relative;
+        }
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background-color: var(--secondary-color);
+        }
+
+        .input-section {
+            background-color: rgb(240, 245, 255);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 25px auto;
+            transition: all 0.3s;
+            width: 220px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-top: 25px;
+
+        }
+
+        .result-title {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+
+        }
+
+        th,
+        td {
+            padding: 10px 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--background-color);
+        }
+
+        .math-formula {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .step {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .final-result {
+            background-color: #d9f1fc;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid rgb(49, 112, 249);
+            margin-top: 25px;
+        }
+
+        .error {
+            color: var(--error-color);
+            background-color: #fde8e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--error-color);
+        }
+
+        .success-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid rgb(49, 112, 249);
+        }
+
+        .success-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+
+        .success-box2 {
+            background-color: rgb(243, 253, 244);
+
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            height: 100px;
+            border-left: 4px solid var(--success-color);
+        }
+
+
+
+        .input-row {
+            display: flex;
+            gap: 20px;
+        }
+
+
+        @media (max-width: 768px) {
+            .input-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        .scrollable-table {
+            max-height: 300px;
+            overflow-y: auto;
+            display: block;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .scrollable-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .scrollable-table th {
+            position: sticky;
+            top: 0;
+            background: #3498db;
+            color: white;
+            z-index: 10;
+        }
+
+        .scrollable-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .scrollable-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .toggle-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0;
+            width: auto;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .horizontal-scroll-container {
+            overflow-x: auto;
+            width: 100%;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .horizontal-table {
+            width: auto;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        .horizontal-table th,
+        .horizontal-table td {
+            padding: 10px 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+            min-width: 120px;
+        }
+
+        .horizontal-table th {
+            background-color: #3498db;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        .fixed-column {
+            position: sticky;
+            left: 0;
+            background-color: #f8f9fa;
+            z-index: 2;
+        }
+
+        /* hết */
+        buttonk {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: all 0.3s;
+            width: 50px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .button-containerk {
+            position: absolute;
+            /* Tách biệt khỏi body */
+            display: flex;
+            flex-direction: column;
+            /* Đặt các nút theo chiều dọc */
+            align-items: flex-start;
+            /* Căn trái */
+            left: 20px;
+            /* Căn trái */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="button-containerk">
+        <buttonk onclick="location.href='/'">Home</buttonk>
+        <!-- <buttonk onclick="location.href='/ppt/ptNewton.html'">Giải Phương trình</buttonk>
+        <buttonk onclick="location.href='/ppt/ppSeidel-Gauss.html'">Giải Hệ 3 pt</buttonk>
+        <buttonk onclick="location.href='/ppt/bpct.html'">PP Bình phương cực tiểu</buttonk>
+        <buttonk onclick="location.href='/ppt/tpSimpson.html'">Tính Tích phân</buttonk>
+        <buttonk onclick="location.href='/ppt/ptvp.html'">Phương trình vi phân</buttonk> -->
+    </div>
+
+    <h1>Improved Euler Method Calculator</h1>
+
+    <div class="input-section">
+        <div class="input-group">
+            <label for="y_diff">Differential equation \( y' = f(x, y) \):</label>
+            <input type="text" id="y_diff" placeholder="e.g., x + y" value="5y + 2e^x">
+        </div>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label for="x0">Initial \( x_0 \):</label>
+                <input type="number" id="x0" step="any" value="0.01">
+            </div>
+            <div class="input-group">
+                <label for="y0">Initial \( y_0 \):</label>
+                <input type="number" id="y0" step="any" value="1">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label for="x1">\( x_1 \):</label>
+                <input type="number" id="x1" step="any" value="0.02">
+            </div>
+            <div class="input-group">
+                <label for="x2">\( x_2 \):</label>
+                <input type="number" id="x2" step="any" value="0.03">
+            </div>
+            <div class="input-group">
+                <label for="h">Step size \( h \):</label>
+                <input type="number" id="h" step="any" value="0.01">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label for="iterations">Number of iterations:</label>
+                <input type="number" id="iterations" min="1" value="3">
+            </div>
+
+            <div class="input-group">
+                <label for="decimalPlaces">Decimal places:</label>
+                <input type="number" id="decimalPlaces" min="1" max="34" value="6">
+            </div>
+        </div>
+    </div>
+
+    <button onclick="calculateEuler()">Calculate</button>
+
+    <div id="result" class="result-section" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 class="result-title">Improved Euler Method Results</h2>
+            <button id="toggleView" class="toggle-btn" onclick="toggleViewMode()">Thu gọn</button>
+        </div>
+        <!-- ... phần còn lại giữ nguyên ... -->
+
+        <div style="background-color: #24ff7f; color: white; padding: 8px 15px; border-radius: 4px; margin-top: 10px;">
+            Calculation successful ✅
+        </div>
+        <h2 class="result-title">Improved Euler Method Results</h2>
+
+        <div id="equation-display" class="math-formula"></div>
+
+        <div class="step">
+            <h3>Initial Values</h3>
+            <div id="initial-values" class="math-formula"></div>
+        </div>
+
+        <div class="step">
+            <h3>Calculate \( y_1 \)</h3>
+            <div id="y1-calculation" class="math-formula"></div>
+            <div id="y1-iterations"></div>
+        </div>
+
+        <div class="step">
+            <h3>Calculate \( y_2 \)</h3>
+            <div id="y2-calculation" class="math-formula"></div>
+            <div id="y2-iterations"></div>
+        </div>
+
+        <div class="final-result">
+            <h3>Final Results</h3>
+            <div id="final-results-table"></div>
+        </div>
+    </div>
+
+    <script>
+        // Làm tròn số
+        function roundTo(value, decimals) {
+            const factor = Math.pow(10, decimals);
+            return Math.round(value * factor) / factor;
+        }
+        function formatNumber(num) {
+            const dcd = parseInt(document.getElementById('decimalPlaces').value);
+            decimals = dcd
+            if (num === null || num === undefined) return "NaN";
+            const rounded = roundTo(num, decimals);
+            let str = rounded.toString();
+
+            // Remove trailing zeros and possible decimal point
+            if (str.indexOf('.') !== -1) {
+                str = str.replace(/\.?0+$/, '');
+            }
+
+            return str === '' ? '0' : str;
+        }
+
+        // Format mathematical expression for display
+        function formatExpression(expr) {
+            // Xử lý hàm exp() và e^ thành e^{...}
+            expr = expr.replace(/exp\(([^)]+)\)/g, 'e^{$1}')
+                .replace(/e\^\(([^)]+)\)/g, 'e^{$1}');
+
+            // Các thay thế khác
+            return expr
+                .replace(/log/g, '\\ln')
+                .replace(/\^/g, '^')
+                .replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}')
+                .replace(/\*/g, '\\cdot ')
+                .replace(/\\cdot/g, '');
+        }
+
+        // Calculate function value with substitution
+        function calcFunction(f, xVal, yVal) {
+            try {
+                // Thay thế exp(x) thành e^x trước khi tính toán
+                let processedExpr = f.replace(/exp\(([^)]+)\)/g, 'e^($1)');
+                // Replace x and y with their values
+                const expr = f.replace(/x/g, `(${xVal})`).replace(/y/g, `(${yVal})`);
+                return math.evaluate(expr);
+            } catch (e) {
+                throw new Error(`Error evaluating function: ${e.message}`);
+            }
+        }
+
+
+        function replaceVars(str, varNames, variables) {
+            varNames.forEach(varName => {
+                // Xử lý biến đứng riêng hoặc sau toán tử
+                str = str.replace(new RegExp(`(^|[^a-zA-Z0-9_])${varName}([^a-zA-Z0-9_]|$)`, 'g'),
+                    `$1${varName}_${variables[varName]}$2`);
+
+                // Xử lý biến đứng sau số (như 2x, 3y)
+                str = str.replace(new RegExp(`(\\d)${varName}([^a-zA-Z0-9_]|$)`, 'g'),
+                    `$1${varName}_${variables[varName]}$2`);
+            });
+            return str;
+        }
+        function format_k(expr, variables = { x: '0', y: '0' }) {
+            // Tạo danh sách biến cần thay thế (theo thứ tự dài trước ngắn)
+            const varNames = Object.keys(variables).sort((a, b) => b.length - a.length);
+
+            // Bước 1: Xử lý các hàm đặc biệt (exp, e^) trước
+            expr = expr.replace(/exp\(([^)]+)\)/g, (match, inner) => {
+                return `exp(${replaceVars(inner, varNames, variables)})`;
+            });
+
+            expr = expr.replace(/e\^([^+\-*/( )]+)/g, (match, inner) => {
+                return `e^{${replaceVars(inner, varNames, variables)}}`;
+            });
+
+            // Bước 2: Xử lý toàn bộ biểu thức
+            expr = replaceVars(expr, varNames, variables);
+
+            return expr;
+        }
+
+        // Hàm tạo bảng ngang
+        function createHorizontalTable(data, prefix) {
+            return `
+                <div class="horizontal-scroll-container">
+                    <table class="horizontal-table">
+                        <thead>
+                            <tr>
+                                <th class="fixed-column"> \\(k\\)</th>
+                                ${data.map(item => `<th> \\(${prefix}^{(${item.iteration})}\\)</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fixed-column"> \\(${prefix}^{(k+1)}\\)</td>
+                                ${data.map(item => `<td> \\(${formatNumber(item.value)}\\)</td>`).join('')}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`;
+        }
+
+        let isDetailedView = true; // Mặc định là chế độ chi tiết
+        let currentResults = {}; // Lưu trữ kết quả hiện tại
+
+
+        function calculateEuler() {
+            try {
+                // Get input values
+                const y_diff = document.getElementById('y_diff').value;
+                const x0 = parseFloat(document.getElementById('x0').value);
+                const y0 = parseFloat(document.getElementById('y0').value);
+                const x1 = parseFloat(document.getElementById('x1').value);
+                const x2 = parseFloat(document.getElementById('x2').value);
+                const h = parseFloat(document.getElementById('h').value);
+                const iterations = parseInt(document.getElementById('iterations').value);
+
+
+                // Validate inputs
+                if (isNaN(x0) || isNaN(y0) || isNaN(x1) || isNaN(x2) || isNaN(h) || isNaN(iterations)) {
+                    throw new Error("Please enter valid numerical values for all inputs");
+                }
+                if (iterations < 1) {
+                    throw new Error("Number of iterations must be at least 1");
+                }
+
+                // Show result section
+                document.getElementById('result').style.display = 'block';
+
+
+
+                // Calculate y1 using improved Euler method
+                // First approximation
+                const s0_y1 = y0 + h * calcFunction(y_diff, x0, y0);
+
+                // Iterative improvements
+                let y1_values = [];
+                let current_y1 = s0_y1;
+                for (let i = 0; i < iterations; i++) {
+                    current_y1 = y0 + h / 2 * (
+                        calcFunction(y_diff, x0, y0) +
+                        calcFunction(y_diff, x1, current_y1)
+                    );
+                    y1_values.push({
+                        iteration: i + 1,
+                        value: current_y1
+                    });
+                }
+
+                // Display y1 calculation
+                const y1_final = y1_values.length > 0 ? y1_values[y1_values.length - 1].value : s0_y1;
+
+
+
+
+                // Calculate y2 using improved Euler method
+                // First approximation
+                const s0_y2 = y1_final + h * calcFunction(y_diff, x1, y1_final);
+
+                // Iterative improvements
+                let y2_values = [];
+                let current_y2 = s0_y2;
+                for (let i = 0; i < iterations; i++) {
+                    current_y2 = y1_final + h / 2 * (
+                        calcFunction(y_diff, x1, y1_final) +
+                        calcFunction(y_diff, x2, current_y2)
+                    );
+                    y2_values.push({
+                        iteration: i + 1,
+                        value: current_y2
+                    });
+                }
+
+                // Display y2 calculation
+                const y2_final = y2_values.length > 0 ? y2_values[y2_values.length - 1].value : s0_y2;
+
+
+
+
+
+
+
+                // Lưu kết quả vào biến currentResults
+                currentResults = {
+                    data: {
+                        y_diff, x0, y0, x1, x2, h, iterations,
+                        y1_values, y2_values, y1_final, y2_final, s0_y1, s0_y2
+                    },
+                    decimalPlaces: parseInt(document.getElementById('decimalPlaces').value)
+                };
+
+                // Hiển thị chế độ chi tiết mặc định
+                isDetailedView = true;
+                renderDetailedView(currentResults.data);
+
+
+            } catch (e) {
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+                        <h3>Error</h3>
+                        <p>${e.message}</p>
+                        <p>Please check your inputs and try again.</p>
+                    </div>
+                `;
+                document.getElementById('result').style.display = 'block';
+            }
+
+            // Render MathJax after updating content
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typeset();
+            }
+        }
+
+        function renderDetailedView(data) {
+            const { y_diff, x0, y0, x1, x2, h, iterations, y1_values, y2_values, y1_final, y2_final, s0_y1, s0_y2 } = data;
+
+            document.getElementById('result').innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 class="result-title">Improved Euler Method Results</h2>
+                    <button id="toggleView" class="toggle-btn" onclick="toggleViewMode()">Thu gọn</button>
+                </div>
+                <div style="background-color: #24ff7f; color: white; padding: 8px 15px; border-radius: 4px; margin-top: 10px;">
+                    Calculation successful ✅
+                </div>
+                
+                <div id="equation-display" class="math-formula"></div>
+                <div class="step">
+                    <h3>Initial Values</h3>
+                    <div id="initial-values" class="math-formula"></div>
+                </div>
+                <div class="step">
+                    <h3>Calculate y₁</h3>
+                    <div id="y1-calculation" class="math-formula"></div>
+                    <div id="y1-iterations"></div>
+                </div>
+                <div class="step">
+                    <h3>Calculate y₂</h3>
+                    <div id="y2-calculation" class="math-formula"></div>
+                    <div id="y2-iterations"></div>
+                </div>
+                <div class="final-result">
+                    <h3>Final Results</h3>
+                    <div id="final-results-table"></div>
+                </div>
+            `;
+
+            // Điền dữ liệu vào các phần tử (giống như trong calculateEuler1)
+            document.getElementById('equation-display').innerHTML = `
+                <p>Solving differential equation:</p>
+                <p>\\[ y' = ${formatExpression(y_diff)} \\]</p>
+            `;
+
+            // ... tiếp tục điền các phần khác như trong calculateEuler1 ...
+            // Display initial values
+            document.getElementById('initial-values').innerHTML = `
+                    <p>Initial conditions:</p>
+                    <p>\\[ y(${x0}) = ${y0} \\]</p>
+                    <p>Step size: \\[ h = ${h} \\]</p>
+                `;
+            document.getElementById('y1-calculation').innerHTML = `
+                    <p>First approximation:</p>
+                    <p>\\[ y_1^{(0)} = y_0 + h f(x_0, y_0) = y_0 + h(${formatExpression(format_k(y_diff, { x: 0, y: 0 }))}) \\]</p>
+                    <p>\\[ =${y0} + ${h} \\times ${formatNumber(calcFunction(y_diff, x0, y0), decimalPlaces)} = ${formatNumber(s0_y1, decimalPlaces)} \\]</p>
+                    <p>Iterative improvements:</p>
+                    <p>\\[ y_1^{(k+1)} = y_0 + \\frac{h}{2} \\left[ f(x_0, y_0) + f(x_1, y_1^{(k)}) \\right] \\]</p>
+                    <p> \\[ y_1^{(k+1)} = y_0 + \\frac{h}{2} \\left[ (${formatExpression(format_k(y_diff, { x: 0, y: 0 }))}) + (${formatExpression(format_k(y_diff, { x: 1, y: 1 }))})  \\right]\\] </p>
+                `;
+            // Display y1 iterations table
+            let y1TableHTML = `
+                    <div class="scrollable-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>\\(\\text{Iteration}\\)</th>
+                                    <th>\\(y_1^{(k+1)}\\)</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            // Bỏ qua phần thêm hàng thứ 0 và chỉ thêm từ iteration 1 trở đi
+            y1_values.forEach(item => {
+                y1TableHTML += `
+                        <tr>
+                            <td>\\(y_1^{(${item.iteration})}\\)</td>
+                            <td>\\(${formatNumber(item.value)}\\)</td>
+                        </tr>`;
+            });
+
+            y1TableHTML += `
+                            </tbody>
+                        </table>
+                    </div>`;
+
+            y1TableHTML += `</tbody></table>`;
+            document.getElementById('y1-iterations').innerHTML = y1TableHTML;
+            document.getElementById('y2-calculation').innerHTML = `
+                    <p>First approximation:</p>
+                    <p> \\[ y_2^{(0)} = y_1 + h f(x_1, y_1) = y_0 + h(${formatExpression(format_k(y_diff, { x: 1, y: 1 }))}) \\]</p>
+                    <p> \\[ = ${formatNumber(y1_final, decimalPlaces)} + ${h} \\times ${formatNumber(calcFunction(y_diff, x1, y1_final), decimalPlaces)} = ${formatNumber(s0_y2, decimalPlaces)} \\]</p>
+                    <p>Iterative improvements:</p>
+                    <p>\\[ y_2^{(k+1)} = y_1 + \\frac{h}{2} \\left[ f(x_1, y_1) + f(x_2, y_2^{(k)}) \\right] \\]</p>
+                    <p> \\[ y_1^{(k+1)} = y_0 + \\frac{h}{2} \\left[ (${formatExpression(format_k(y_diff, { x: 1, y: 1 }))}) + (${formatExpression(format_k(y_diff, { x: 2, y: 2 }))})  \\right]\\] </p>
+                `;
+            let y2TableHTML = `
+                    <div class="scrollable-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>\\(\\text{Iteration}\\)</th>
+                                    <th>\\(y_1^{(k+1)}\\)</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            // Bỏ qua phần thêm hàng thứ 0 và chỉ thêm từ iteration 1 trở đi
+            y2_values.forEach(item => {
+                y2TableHTML += `
+                        <tr>
+                            <td>\\(y_2^{(${item.iteration})}\\)</td>
+                            <td>\\(${formatNumber(item.value)}\\)</td>
+                        </tr>`;
+            });
+
+            y2TableHTML += `
+                            </tbody>
+                        </table>
+                    </div>`;
+
+            y2TableHTML += `</tbody></table>`;
+            document.getElementById('y2-iterations').innerHTML = y2TableHTML;
+            let finalTableHTML = `
+                    <div class="success-box">
+                        <div class="success-box2">
+                            <p style="color: #0afc6f; font-size: 20px;"> \\(\\quad\\) Kết quả xấp xỉ : </p>
+                            <div style="font-size: 1.3em; text-align: center;"> 
+                                \\[y(${x1}) \\approx ${formatNumber(y1_final)}\\quad y(${x2}) \\approx ${formatNumber(y2_final)} \\]
+                            </div>
+                        </div>
+                    </div>`;
+            document.getElementById('final-results-table').innerHTML = finalTableHTML;
+
+        }
+
+        // Sửa hàm renderCompactView để sử dụng decimalPlaces từ currentResults
+        function renderCompactView(data) {
+            const { y_diff, x0, y0, x1, x2, h, y1_values, y2_values, y1_final, y2_final, s0_y1, s0_y2 } = data;
+
+            document.getElementById('result').innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 class="result-title">Improved Euler Method Results</h2>
+                    <button id="toggleView" class="toggle-btn" onclick="toggleViewMode()">Chi tiết</button>
+                </div>
+                <div style="background-color: #24ff7f; color: white; padding: 8px 15px; border-radius: 4px; margin-top: 10px;">
+                    Calculation successful ✅
+                </div>
+                
+                <div id="main-result-content"></div>
+            `;
+
+            const mainContent = document.getElementById('main-result-content');
+            mainContent.innerHTML = `
+                <div class="math-formula">
+                    <p>Phương trình vi phân:</p>
+                    <p>\\[ y' = ${formatExpression(y_diff)}; x₀ = ${x0}; y₀ = ${y0}; x₁ = ${x1}; x₂ = ${x2} \\]</p>
+                </div>
+                
+                <div class="step math-formula">
+                    <p>Tính y₁ tại x = ${x1}</p>
+                    <p>\\[ y_1^{(0)} =y_0 + h(${formatExpression(format_k(y_diff, { x: 0, y: 0 }))}) = ${formatNumber(s0_y1, currentResults.decimalPlaces)} \\]</p>
+                    <p> \\[ y_1^{(k+1)} = y_0 + \\frac{h}{2} \\left[ (${formatExpression(format_k(y_diff, { x: 0, y: 0 }))}) + (${formatExpression(format_k(y_diff, { x: 1, y: 1 }))})  \\right]\\] </p>
+                    ${createHorizontalTable(y1_values, 'y₁')}
+                </div>
+                
+                <div class="step math-formula">
+                    <p>Tính y₂ tại x = ${x2}</p>
+                    <p>\\[ y_2^{(0)} = y_1 + h(${formatExpression(format_k(y_diff, { x: 1, y: 1 }))}) = ${formatNumber(s0_y2, currentResults.decimalPlaces)} \\]</p>
+                    <p> \\[ y_1^{(k+1)} = y_1 + \\frac{h}{2} \\left[ (${formatExpression(format_k(y_diff, { x: 1, y: 1 }))}) + (${formatExpression(format_k(y_diff, { x: 2, y: 2 }))})  \\right]\\] </p>
+                    ${createHorizontalTable(y2_values, 'y₂')}
+                </div>
+                
+                <div class="final-result math-formula">
+                    <h3>Kết quả cuối cùng</h3>
+                    <p>\\[ y(${x1}) ≈ ${formatNumber(y1_final, currentResults.decimalPlaces)} \\]</p>
+                    <p>\\[ y(${x2}) ≈ ${formatNumber(y2_final, currentResults.decimalPlaces)} \\]</p>
+                </div>
+            `;
+        }
+        function toggleViewMode() {
+            const toggleBtn = document.getElementById('toggleView');
+            const resultContainer = document.getElementById('result');
+
+            if (!resultContainer || !currentResults.data) return;
+
+            isDetailedView = !isDetailedView;
+
+            if (isDetailedView) {
+                toggleBtn.textContent = 'Thu gọn';
+                renderDetailedView(currentResults.data);
+            } else {
+                toggleBtn.textContent = 'Chi tiết';
+                renderCompactView(currentResults.data);
+            }
+
+            // Render lại MathJax
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typeset();
+            }
+        }
+
+        // Main calculation function
+
+    </script>
+</body>
+
+</html>

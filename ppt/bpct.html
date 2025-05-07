@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Least Squares Method Calculator</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f7fa;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            position: relative;
+        }
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background-color: var(--secondary-color);
+        }
+
+        .input-section {
+            background-color: rgb(240, 245, 255);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            flex: 1;
+            /* Chiếm đều không gian */
+            margin-bottom: 22px;
+
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 25px auto;
+            transition: all 0.3s;
+            width: 220px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-top: 25px;
+        }
+
+        .result-title {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 25px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: rgb(0, 0, 0);
+            padding: 12px 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 10px 15px;
+            text-align: center;
+            border: 1px solid #eee;
+            background-color: white;
+        }
+
+        tr:nth-child(even) td {
+            background-color: var(--background-color);
+        }
+
+        .math-formula {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .step {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .final-result {
+            background-color: #e8f4fc;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            margin-top: 25px;
+        }
+
+        .error {
+            color: var(--error-color);
+            background-color: #fde8e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--error-color);
+        }
+
+        .number-cell {
+            font-family: 'Consolas', 'Monaco', monospace;
+            text-align: right;
+            padding-right: 15px;
+        }
+
+        .mjx-chtml {
+            font-size: 1.1em !important;
+        }
+
+        .success-box {
+            background-color: #e8f8f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .success-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 20px;
+            margin-top: 1px;
+        }
+
+        .data-points {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .data-point {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .data-table {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 8px 12px;
+            text-align: center;
+
+        }
+
+        .reset-btn {
+            background-color: #a8d8ea;
+            color: #333;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            width: auto;
+            font-size: 90%;
+            font-weight: 200;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: absolute;
+            margin-left: 600px;
+            margin-top: 495px;
+        }
+
+        .reset-btn:hover {
+            background-color: #8cc2d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 768px) {
+
+            .input-row,
+            .data-points {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .reset-btn {
+                position: static;
+                margin: 10px auto;
+                display: block;
+            }
+        }
+
+        .scrollable-table {
+            max-height: 300px;
+            /* Chiều cao tối đa trước khi xuất hiện thanh cuộn */
+            overflow-y: auto;
+            /* Thanh cuộn dọc khi cần */
+            display: block;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .scrollable-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .scrollable-table th {
+            position: sticky;
+            top: 0;
+            background: #1e8fff;
+            color: #e8f4fc;
+            z-index: 10;
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .scrollable-table {
+                max-height: 200px;
+                font-size: 14px;
+            }
+        }
+
+        buttonk {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: all 0.3s;
+            width: 50px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .button-containerk {
+            position: absolute;
+            /* Tách biệt khỏi body */
+            display: flex;
+            flex-direction: column;
+            /* Đặt các nút theo chiều dọc */
+            align-items: flex-start;
+            /* Căn trái */
+            left: 20px;
+            /* Căn trái */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="button-containerk">
+        <buttonk onclick="location.href='/'">Home</buttonk>
+        <!-- <buttonk onclick="location.href='/ppt/ptNewton.html'">Giải Phương trình</buttonk>
+        <buttonk onclick="location.href='/ppt/ppSeidel-Gauss.html'">Giải Hệ 3 pt</buttonk>
+        <buttonk onclick="location.href='/ppt/bpct.html'">PP Bình phương cực tiểu</buttonk>
+        <buttonk onclick="location.href='/ppt/tpSimpson.html'">Tính Tích phân</buttonk>
+        <buttonk onclick="location.href='/ppt/ptvp.html'">Phương trình vi phân</buttonk> -->
+    </div>
+
+    <h1>Least Squares Method Calculator</h1>
+    <button class="reset-btn" onclick="resetCalculator()">Reset</button>
+
+    <div class="input-section">
+        <div class="input-row">
+            <div class="input-group">
+                <label for="f_a">Coefficient a function (φ₁(x)):</label>
+                <input type="text" id="f_a" placeholder="x" value="log(x)">
+
+            </div>
+
+            <div class="input-group">
+                <label for="f_b">Coefficient b function (φ₂(x)):</label>
+                <input type="text" id="f_b" placeholder="1" value="x^3">
+            </div>
+
+            <div class="input-group">
+                <label for="f_free">Free term function (φ₀(x)):</label>
+                <input type="text" id="f_free" placeholder="0" value="1">
+            </div>
+
+        </div>
+        <small style="color: #7f8c8d; font-size: 0.9em;">Use JavaScript math syntax: log, sin, cos, exp, sqrt, ^
+            for
+            power</small>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label for="n">Number of data points (n):</label>
+                <input type="number" id="n" min="2" value="3">
+            </div>
+            <div class="input-group">
+                <label for="n">Dấu chấm động :</label>
+                <input type="number" id="floatpoint" min="2" value="6">
+            </div>
+
+        </div>
+
+        <div id="data-points-container" class="data-points">
+            <!-- Data points will be added here dynamically -->
+        </div>
+    </div>
+
+    <button onclick="calculateLeastSquares()">Calculate</button>
+
+    <div id="result" class="result-section" style="display: none;">
+        <div style="background-color: #24ff7f; color: white; padding: 8px 15px; border-radius: 4px; margin-top: 10px;">
+            Tính toán thành công ✅</div>
+        <h2 class="result-title">Least Squares Calculation Results</h2>
+
+        <div id="function-display" class="math-formula"></div>
+
+        <div class="step">
+            <h3>Data Points</h3>
+            <div id="data-points-display"></div>
+        </div>
+
+        <div class="step">
+            <h3>Sum of Squares Function</h3>
+            <div id="sum-squares" class="math-formula"></div>
+        </div>
+
+        <div class="step">
+            <h3>Partial Derivatives</h3>
+            <div id="partial-derivatives" class="math-formula"></div>
+        </div>
+
+        <div class="step">
+            <h3>Sum formulas</h3>
+            <div id="sum-formulas" class="math-formula"></div>
+        </div>
+
+        <div class="step">
+            <h3>Normal Equations</h3>
+            <div id="normal-equations" class="math-formula"></div>
+        </div>
+
+        <div class="step">
+            <h3>Equation System</h3>
+            <div id="equation-system" class="math-formula"></div>
+        </div>
+
+        <div class="final-result">
+            <h3>Final Result</h3>
+            <div id="final-result" class="math-formula"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let dataPoints = [];
+
+        // Initialize data points when n changes
+        document.getElementById('n').addEventListener('change', function () {
+            const n = parseInt(this.value);
+            if (n < 2) {
+                alert('Number of data points must be at least 2');
+                this.value = 2;
+                return;
+            }
+
+            const container = document.getElementById('data-points-container');
+            container.innerHTML = '';
+
+
+            let temp_x = [1.2, 1.5, 2.0];
+            let temp_y = [6.55, 11.94, 26.39];
+
+
+            for (let i = 0; i < n; i++) {
+                const pointDiv = document.createElement('div');
+                pointDiv.className = 'data-point';
+                pointDiv.innerHTML = `
+                    <label for="x_${i}"> \\(x_${i}:\\) </label>
+                    <input type="number" id="x_${i}" step="any" placeholder="x value" value="${temp_x[i]}">
+                    <label for="y_${i}"> \\(y_${i}:\\)</label>
+                    <input type="number" id="y_${i}" step="any" placeholder="y value" value="${temp_y[i]}">
+                `;
+                container.appendChild(pointDiv);
+            }
+        });
+
+        // Làm tròn số
+        function roundTo(value, decimals) {
+            const factor = Math.pow(10, decimals);
+            return Math.round(value * factor) / factor;
+        }
+        function formatNumber(num) {
+            const dcd = parseInt(document.getElementById('floatpoint').value);
+            decimals = dcd
+            if (num === null || num === undefined) return "NaN";
+            const rounded = roundTo(num, decimals);
+            let str = rounded.toString();
+
+            // Remove trailing zeros and possible decimal point
+            if (str.indexOf('.') !== -1) {
+                str = str.replace(/\.?0+$/, '');
+            }
+
+            return str === '' ? '0' : str;
+        }
+
+        // Trigger initial setup
+        document.getElementById('n').dispatchEvent(new Event('change'));
+
+        function resetCalculator() {
+            window.location.reload();
+        }
+
+        function format_k(expr) {
+            return expr
+                .replace(/\bx\b/g, 'x_{k}')
+                .replace(/\by\b/g, 'y_{k}');
+        }
+
+        function formatExpression(expr) {
+            return expr
+                .replace(/log/g, '\\ln')
+                .replace(/\^/g, '^')
+                .replace(/exp\(([^)]+)\)/g, 'e^{$1}')
+                .replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}')
+                .replace(/\\cdot/g, '')
+                .replace(/\*/g, '')
+                .replace(/([^\/]+)\/([^\/]+)/g, '\\frac{$1}{$2}');
+        }
+
+        function calculateLeastSquares() {
+            try {
+                // Get input values
+                const f_a = document.getElementById('f_a').value || '0';
+                const f_b = document.getElementById('f_b').value || '0';
+                const f_free = document.getElementById('f_free').value || '0';
+                const n = parseInt(document.getElementById('n').value);
+
+
+                // Collect data points
+                dataPoints = [];
+                for (let i = 0; i < n; i++) {
+                    const x = parseFloat(document.getElementById(`x_${i}`).value);
+                    const y = parseFloat(document.getElementById(`y_${i}`).value);
+
+                    if (isNaN(x) || isNaN(y)) {
+                        throw new Error(`Please enter valid numbers for data point ${i}`);
+                    }
+
+                    dataPoints.push({ x, y });
+                }
+
+                // Show result section
+                document.getElementById('result').style.display = 'block';
+
+
+                // Display the approximation function
+                const fDisplay = `a \\cdot ${f_a} + b \\cdot ${f_b} ${f_free ? ' + ' + f_free : ''}`;
+                document.getElementById('function-display').innerHTML = `
+                    <p>Approximation function:</p>
+                    <p>\\[ y = ${formatExpression(fDisplay)} \\]</p>
+                `;
+
+                // Display data points in a table
+                // Display data points in a scrollable table
+                let dataPointsHTML = `
+                    <div class="scrollable-table">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th> \\(k\\) </th>
+                                    <th> \\(x_k\\) </th>
+                                    <th> \\(y_k\\) </th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                dataPoints.forEach((point, i) => {
+                    dataPointsHTML += `
+                        <tr>
+                            <td> \\(${i + 1}\\) </td>
+                            <td> \\(${point.x}\\)</td>
+                            <td> \\(${point.y}\\)</td>
+                        </tr>`;
+                });
+
+                dataPointsHTML += `
+                                </tbody>
+                            </table>
+                        </div>`;
+
+                document.getElementById('data-points-display').innerHTML = dataPointsHTML;
+
+                // Display sum of squares function
+                const sExpr = `(a \\cdot ${f_a} + b \\cdot ${f_b} ${f_free ? ' + ' + f_free : ''}- y_k)^2 `;
+                document.getElementById('sum-squares').innerHTML = `
+                    <p>Sum of squares function:</p>
+                    <p>\\[ S = \\sum_{k=1}^{${n}} ${formatExpression(format_k(sExpr))} \\]</p>
+                `;
+
+                // Display partial derivatives
+                const sDiffA = `(a \\cdot ${f_a} + b \\cdot ${f_b} ${f_free ? ' + ' + f_free : ''} - y_k) \\cdot ${f_a}`;
+                const sDiffB = `(a \\cdot ${f_a} + b \\cdot ${f_b} ${f_free ? ' + ' + f_free : ''} - y_k) \\cdot ${f_b}`;
+
+                document.getElementById('partial-derivatives').innerHTML = `
+                    <p>Partial derivatives:</p>
+                    <p>\\[ \\frac{\\partial S}{\\partial a} = 2 \\sum_{k=1}^{${n}} ${formatExpression(format_k(sDiffA))} \\]</p>
+                    <p>\\[ \\frac{\\partial S}{\\partial b} = 2 \\sum_{k=1}^{${n}} ${formatExpression(format_k(sDiffB))} \\]</p>
+                `;
+
+
+
+                // Calculate normal equations
+                // φ₁², φ₁φ₂, φ₁φ₀, φ₁y
+                // φ₂φ₁, φ₂², φ₂φ₀, φ₂y
+                // Cách viết an toàn nhất (thêm ngoặc cho tất cả các phép toán)
+                const he_pt1 = [
+                    `(${f_a})*(${f_a})`,   // Thay vì f_a+'^2'
+                    `(${f_a})*(${f_b})`,
+                    `(${f_a})*(${f_free})`,
+                    `(${f_a})*y`
+                ];
+
+                const he_pt2 = [
+                    `(${f_b})*(${f_a})`,
+                    `(${f_b})*(${f_b})`,   // Thay vì f_b+'^2'
+                    `(${f_b})*(${f_free})`,
+                    `(${f_b})*y`
+                ];
+
+                document.getElementById('sum-formulas').innerHTML = `
+                    <p>Sum Formulas:</p>
+                    <p>\\[ 
+                        \\begin{cases}
+                            \\left( \\sum\\limits_{k=1}^{${n}} ${formatExpression(format_k(he_pt1[0]))}\\right)a + \\left(\\sum\\limits_{k=1}^{${n}} ${formatExpression(format_k(he_pt1[1]))}\\right)b + \\left(\\sum\\limits_{k=1}^{${n}} ${formatExpression(format_k(he_pt1[2]))}\\right) - \\left(\\sum\\limits_{k=1}^{${n}} ${formatExpression(format_k(he_pt1[3]))} \\right) = 0 \\\\[1.1ex]
+                            \\left( \\sum\\limits_{k=1}^{${n}} ${formatExpression(format_k(he_pt2[0]))}\\right)a + \\left(\\sum\\limits_{k=1}^{${n}} ${formatExpression(format_k(he_pt2[1]))}\\right)b + \\left(\\sum\\limits_{k=1}^{${n}} ${formatExpression(format_k(he_pt2[2]))}\\right) - \\left(\\sum\\limits_{k=1}^{${n}} ${formatExpression(format_k(he_pt2[3]))} \\right) = 0
+                        \\end{cases}
+                    \\]</p>
+                `;
+
+
+                // Calculate sums for each term
+                const sums1 = [0, 0, 0, 0];
+                const sums2 = [0, 0, 0, 0];
+
+                // Tạo biểu thức an toàn
+                function safeExpr(expr, varName) {
+                    return `(${expr.replace(/x/g, varName)})`;
+                }
+
+                // Tính các tổng
+                dataPoints.forEach(point => {
+                    for (let i = 0; i < 4; i++) {
+                        const x_expr = `(${point.x})`; // Đóng gói giá trị x
+
+                        // Xử lý an toàn cho y
+                        const expr1 = he_pt1[i].replace(/y/g, point.y.toString());
+                        const expr2 = he_pt2[i].replace(/y/g, point.y.toString());
+
+                        // Thay thế x an toàn
+                        const finalExpr1 = expr1.replace(/x/g, x_expr);
+                        const finalExpr2 = expr2.replace(/x/g, x_expr);
+
+                        sums1[i] += math.evaluate(finalExpr1);
+                        sums2[i] += math.evaluate(finalExpr2);
+                    }
+                });
+
+                // Round sums to 6 decimal places
+                for (let i = 0; i < 4; i++) {
+                    sums1[i] = parseFloat(formatNumber(sums1[i]));
+                    sums2[i] = parseFloat(formatNumber(sums2[i]));
+                }
+
+
+                // Display normal equations
+                // Hàm định dạng hệ số đầu tiên (không thêm dấu +)
+                function formatFirstCoefficient(value) {
+                    const num = parseFloat(value);
+                    return (num >= 0) ? `${num}` : `- ${Math.abs(num)}`;
+                }
+
+                // Hàm định dạng hệ số tiếp theo (thêm dấu + hoặc -)
+                function formatFollowingCoefficient(value) {
+                    const num = parseFloat(value);
+                    return (num >= 0) ? `+ ${num}` : `- ${Math.abs(num)}`;
+                }
+
+                document.getElementById('normal-equations').innerHTML = `
+                    <p>Normal equations:</p>
+                    <p>\\[ 
+                        \\begin{cases}
+                            ${formatFirstCoefficient(sums1[0])}a ${formatFollowingCoefficient(sums1[1])}b ${formatFollowingCoefficient(sums1[2])} ${formatFollowingCoefficient(-sums1[3])} = 0 \\\\[1.1ex]
+                            ${formatFirstCoefficient(sums2[0])}a ${formatFollowingCoefficient(sums2[1])}b ${formatFollowingCoefficient(sums2[2])} ${formatFollowingCoefficient(-sums2[3])} = 0 
+                        \\end{cases}
+                    \\]</p>
+                `;
+
+                // Solve the system of equations
+                const a11 = sums1[0];
+                const a12 = sums1[1];
+                const b1 = -sums1[3] + sums1[2];
+
+                const a21 = sums2[0];
+                const a22 = sums2[1];
+                const b2 = -sums2[3] + sums2[2];
+
+                // Display equation system
+
+
+                // Áp dụng vào hệ phương trình
+                document.getElementById('equation-system').innerHTML = `
+                    <p>Equation system:</p>
+                    <p>\\[ 
+                        \\begin{cases}
+                            ${formatFirstCoefficient(a11)}a ${formatFollowingCoefficient(a12)}b = ${formatFirstCoefficient(formatNumber(-b1))} \\\\[1.1ex]
+                            ${formatFirstCoefficient(a21)}a ${formatFollowingCoefficient(a22)}b = ${formatFirstCoefficient(formatNumber(-b2))}
+                        \\end{cases}
+                    \\]</p>
+                `;
+
+                // Solve using Cramer's rule
+                const det = a11 * a22 - a12 * a21;
+                if (Math.abs(det) < 1e-10) {
+                    throw new Error('The system of equations has no unique solution (determinant is zero)');
+                }
+
+                const bSol = (a21 * -b1 - a11 * -b2) / (a21 * a12 - a11 * a22);
+                const aSol = (-b1 / a11) - (a12 / a11) * bSol;
+
+
+                // Display final result
+                document.getElementById('final-result').innerHTML = `
+                    <div class="success-box">
+                        <h3>Solution Found</h3>
+                        <p>\\[ 
+                            \\begin{cases}
+                                a = ${formatNumber(aSol)}\\\\[1.1ex]
+                                b = ${formatNumber(bSol)}
+                            \\end{cases}
+                        \\]</p>
+                        <p>Final approximation function:</p>
+                        <p style="font-size: 1.3em; text-align: center;">
+                            \\[ y = ${formatFirstCoefficient(formatNumber(aSol))} ${formatExpression(f_a)} + ${formatFirstCoefficient(formatNumber(bSol))} ${formatExpression(f_b)}${f_free ? ' + ' + formatExpression(f_free) : ''} \\]
+                        </p>
+                    </div>
+                `;
+
+            } catch (e) {
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+                        <h3>Error</h3>
+                        <p>Xuất hiện lỗi : ${e.message}</p>
+                        <p>Vui lòng kiểm tra lại dữ liệu đã nhập và thử lại </p>
+                    </div>
+                `;
+                document.getElementById('result').style.display = 'block';
+            }
+
+            // Render MathJax after updating content
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typeset();
+            }
+        }
+    </script>
+</body>
+
+</html>

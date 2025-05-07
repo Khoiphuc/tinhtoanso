@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newton's Method Calculator</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f7fa;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            position: relative;
+        }
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background-color: var(--secondary-color);
+        }
+
+        .input-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 25px auto;
+            transition: all 0.3s;
+            width: 220px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-top: 25px;
+        }
+
+        .result-title {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 25px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 10px 15px;
+            text-align: center;
+            border: 1px solid #eee;
+            background-color: white;
+        }
+
+        tr:nth-child(even) td {
+            background-color: var(--background-color);
+        }
+
+        .math-formula {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .step {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .final-result {
+            background-color: #e8f4fc;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            margin-top: 25px;
+        }
+
+        .error {
+            color: var(--error-color);
+            background-color: #fde8e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--error-color);
+        }
+
+        .number-cell {
+            font-family: 'Consolas', 'Monaco', monospace;
+            text-align: right;
+            padding-right: 15px;
+        }
+
+        .mjx-chtml {
+            font-size: 1.1em !important;
+        }
+
+        .success-box {
+            background-color: #e8f8f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .success-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 20px;
+            margin-top: 1px;
+        }
+
+        #iteration-process {
+            max-height: 400px;
+            /* Giới hạn chiều cao để có thanh cuộn */
+            overflow-y: auto;
+            /* Tạo thanh cuộn khi nội dung quá dài */
+            border: 1px solid #ccc;
+            /* Viền bảng để dễ nhìn */
+            padding: 5px;
+            /* Khoảng cách giữa nội dung và viền */
+            width: 100%;
+            /* Đảm bảo bảng chiếm hết chiều rộng */
+        }
+
+        .iteration-row {
+            display: flex;
+            justify-content: space-between;
+            /* Căn đều nội dung */
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            /* Tạo đường phân cách giữa các dòng */
+
+        }
+
+        .iteration-value {
+            flex: 1;
+            /* Cho phép ô giá trị co giãn theo kích thước */
+            text-align: center;
+            /* Căn giữa nội dung */
+            font-size: 16px;
+            border-right: 1px solid #ccc;
+            /* Đường kẻ giữa các cột */
+
+        }
+
+        @media (max-width: 768px) {
+            .input-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        /* Thêm vào phần CSS hiện có */
+        .reset-btn {
+            background-color: #a8d8ea;
+            color: #333;
+            border: none;
+            padding: 5px 10px;
+            /* Giảm kích thước nút */
+            border-radius: 4px;
+            transition: all 0.3s;
+            width: auto;
+            font-size: 90%;
+            /* Giảm kích thước chữ */
+            font-weight: 200;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: absolute;
+            /* Đưa nút về bên trái */
+            margin-left: 420px;
+            /* Điều chỉnh khoảng cách với mép trái */
+            margin-top: 340px;
+        }
+
+        .reset-btn:hover {
+            background-color: #8cc2d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        buttonk {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: all 0.3s;
+            width: 50px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .button-containerk {
+            position: absolute;
+            /* Tách biệt khỏi body */
+            display: flex;
+            flex-direction: column;
+            /* Đặt các nút theo chiều dọc */
+            left: 20px;
+            /* Căn trái */
+
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="button-containerk">
+        <buttonk onclick="location.href='/'">Home</buttonk>
+        <!-- <buttonk onclick="location.href='/ppt/ptNewton.html'">Giải Phương trình</buttonk>
+        <buttonk onclick="location.href='/ppt/ppSeidel-Gauss.html'">Giải Hệ 3 pt</buttonk>
+        <buttonk onclick="location.href='/ppt/bpct.html'">PP Bình phương cực tiểu</buttonk>
+        <buttonk onclick="location.href='/ppt/tpSimpson.html'">Tính Tích phân</buttonk>
+        <buttonk onclick="location.href='/ppt/ptvp.html'">Phương trình vi phân</buttonk> -->
+    </div>
+
+    <h1>Newton's Method Calculator</h1>
+    <button class="reset-btn" onclick="resetCalculator()">Ref</button>
+    <div class="input-section">
+        <div class="input-group">
+            <label for="function">Function f(x):</label>
+            <input type="text" id="function" placeholder="x^3 - 2x - 5" value="x^2 + 1/x -40">
+            <small style="color: #7f8c8d; font-size: 0.9em;">Use JavaScript math syntax: log, sin, cos, exp, sqrt, ^ for
+                power</small>
+        </div>
+
+        <div class="input-row">
+            <div class="input-group" style="flex: 1;">
+                <label for="lower">Đầu đoạn (a):</label>
+                <input type="number" id="lower" step="any" value="6">
+            </div>
+
+            <div class="input-group" style="flex: 1;">
+                <label for="upper">Cuối đoạn (b):</label>
+                <input type="number" id="upper" step="any" value="7">
+            </div>
+
+            <div class="input-group" style="flex: 1;">
+                <label for="floatpoint">Dấu chấm động</label>
+                <input type="number" id="floatpoint" value="6" min="1" max="34">
+            </div>
+        </div>
+        <div class="input-group" style="flex: 1;">
+            <label for="iterations">Số lần lặp:</label>
+            <input type="number" id="iterations" min="1" value="3">
+        </div>
+    </div>
+
+    <button onclick="calculate()">Calculate</button>
+
+
+    <div id="result" class="result-section" style="display: none;">
+        <h2 class="result-title">Calculation Results</h2>
+
+        <div id="function-display" class="math-formula"></div>
+
+        <div class="step">
+            <h3>Derivatives</h3>
+            <div id="derivatives" class="math-formula"></div>
+        </div>
+
+        <div class="step">
+            <h3>Initial Point Selection</h3>
+            <div id="initial-point" class="math-formula"></div>
+        </div>
+
+        <div class="step">
+            <h3>Iteration Process</h3>
+            <div id="iteration-process"></div>
+        </div>
+
+        <div class="step">
+            <h3>Error Estimation</h3>
+            <div id="error-estimation" class="math-formula"></div>
+        </div>
+
+        <div class="final-result">
+            <h3>Final Result</h3>
+            <div id="final-result" class="math-formula"></div>
+        </div>
+    </div>
+
+    <script>
+
+        function roundTo(value, decimals) {
+            const factor = Math.pow(10, decimals);
+            return Math.round(value * factor) / factor;
+        }
+
+        function formatNumber(num) {
+            const dcd = parseInt(document.getElementById('floatpoint').value);
+            decimals = dcd
+            if (num === null || num === undefined) return "NaN";
+            const rounded = roundTo(num, decimals);
+            let str = rounded.toString();
+
+            // Remove trailing zeros and possible decimal point
+            if (str.indexOf('.') !== -1) {
+                str = str.replace(/\.?0+$/, '');
+            }
+
+            return str === '' ? '0' : str;
+        }
+
+        function calculateDerivative(f, x) {
+            const h = 0.0001;
+            try {
+                // Tính đạo hàm số với công thức trung tâm 5 điểm cho độ chính xác cao hơn
+                return (-math.evaluate(f, { x: x + 2 * h })
+                    + 8 * math.evaluate(f, { x: x + h })
+                    - 8 * math.evaluate(f, { x: x - h })
+                    + math.evaluate(f, { x: x - 2 * h }))
+                    / (12 * h);
+            }
+            catch (e) {
+                console.error("Error calculating derivative:", e);
+                return NaN;
+            }
+        }
+
+        function calculateSecondDerivative(f, x) {
+            const h = 0.0001;
+            try {
+                // Tính đạo hàm bậc hai với công thức sai phân hữu hạn
+                return (math.evaluate(f, { x: x + h })
+                    - 2 * math.evaluate(f, { x: x })
+                    + math.evaluate(f, { x: x - h }))
+                    / (h * h);
+            } catch (e) {
+                console.error("Error calculating second derivative:", e);
+                return NaN;
+            }
+        }
+
+        function resetCalculator() {
+            // Cách 1: Đơn giản nhất - Tải lại trang
+            // window.location.reload();
+
+            // Cách 2: Mềm mại hơn - Reset toàn bộ state
+            window.location.href = window.location.href;
+            document.getElementById('function').value = '';
+            document.getElementById('lower').value = '';
+            document.getElementById('upper').value = '';
+            document.getElementById('iterations').value = '';
+        }
+
+        function calculate() {
+            // Get input values
+            const fInput = document.getElementById('function').value;
+            const a = parseFloat(document.getElementById('lower').value);
+            const b = parseFloat(document.getElementById('upper').value);
+            const iterations = parseInt(document.getElementById('iterations').value);
+
+
+            // Show result section
+            document.getElementById('result').style.display = 'block';
+
+
+
+            try {
+                // Validate inputs
+                if (isNaN(a)) throw new Error('Lower bound must be a number');
+                if (isNaN(b)) throw new Error('Upper bound must be a number');
+                if (isNaN(iterations) || iterations < 1) throw new Error('Number of iterations must be a positive integer');
+
+                // Test the function
+                math.evaluate(fInput, { x: a });
+                math.evaluate(fInput, { x: b });
+
+                let fDisplay = fInput
+                    .replace(/log/g, '\\ln')
+                    .replace(/\^/g, '^')
+                    .replace(/exp\(([^)]+)\)/g, 'e^{$1}')
+                    .replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}')
+                    .replace(/([^+\-*/()]+)\/([^+\-*/()]+)/g, '\\frac{$1}{$2}'); // Tổng quát hơn
+
+                document.getElementById('function-display').innerHTML = `
+                    <p>Function to find root:</p>
+                    <p>\\[ f(x) = ${fDisplay} \\]</p>
+                `;
+
+                // Calculate derivatives numerically
+                const fPrime = (x) => calculateDerivative(fInput, x);
+                const fDoublePrime = (x) => calculateSecondDerivative(fInput, x);
+
+                // Calculate symbolic derivatives
+                let fPrimeDisplay = '';
+                let fDoublePrimeDisplay = '';
+                try {
+                    // Compute first derivative
+                    fInput2 = fInput.replace(/1\/x/g, 'x^(-1)');
+                    const fNode = math.parse(fInput2);
+                    const fPrimeNode = math.derivative(fNode, 'x');
+
+                    fPrimeDisplay = fPrimeNode.toString()
+                        .replace(/log/g, '\\ln')
+                        .replace(/\^/g, '^')
+                        .replace(/exp\(([^)]+)\)/g, 'e^{$1}')
+                        .replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}')
+                        .replace(/\*/g, ' \\times') // Loại bỏ dấu * hoàn toàn
+                        .replace(/([^\/]+)\/([^\/]+)/g, '\\frac{$1}{$2}'); // Chuyển a/b thành \frac{a}{b}
+
+
+
+                    // Compute second derivative
+                    const fDoublePrimeNode = math.derivative(fPrimeNode, 'x');
+                    fDoublePrimeDisplay = fDoublePrimeNode.toString()
+                        .replace(/log/g, '\\ln')
+                        .replace(/\^/g, '^')
+                        .replace(/exp\(([^)]+)\)/g, 'e^{$1}')
+                        .replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}')
+                        .replace(/\*/g, '\\times') // Loại bỏ dấu * hoàn toàn
+                        .replace(/([^\/]+)\/([^\/]+)/g, '\\frac{$1}{$2}'); // Chuyển a/b thành \frac{a}{b}
+                } catch (e) {
+                    console.error("Error calculating symbolic derivatives:", e);
+                    fPrimeDisplay = 'Unable\\ to\\ compute';
+                    fDoublePrimeDisplay = 'Unable\\ to\\ compute';
+                }
+
+                // Display derivatives
+                document.getElementById('derivatives').innerHTML = `
+                    <p>First derivative:</p>
+                    <p>\\[ f'(x) = ${fPrimeDisplay} > 0 \\text{ } \\forall x \\in [${a};${b}] \\]</p>
+                    <p>Second derivative:</p>
+                    <p>\\[ f''(x) = ${fDoublePrimeDisplay} > 0 \\text{ } \\forall x \\in [${a};${b}] \\]</p>
+                `;
+
+                // Determine initial point
+                let x0;
+                const fA = math.evaluate(fInput, { x: a });
+                const fDoublePrimeA = fDoublePrime(a);
+                const productA = fA * fDoublePrimeA;
+
+                if (productA > 0) {
+                    x0 = a;
+                } else {
+                    x0 = b;
+                }
+
+                document.getElementById('initial-point').innerHTML = `
+                    <p>Checking condition for initial point:</p>
+                    <p>\\[ f(${a}) \\cdot f''(${a}) = ${formatNumber(fA)} \\times ${formatNumber(fDoublePrimeA)} = ${formatNumber(productA)} ${productA > 0 ? '> 0' : '< 0'} \\]</p>
+                    <p>\\[ \\Rightarrow x_0 = ${x0} \\]</p>
+                `;
+
+                // Perform iterations
+                let currentX = x0;
+                let iterationValues = [];
+                let iterationHTML = '';
+
+
+                for (let i = 0; i < iterations; i++) {
+                    const fVal = math.evaluate(fInput, { x: currentX });
+                    const fPrimeVal = fPrime(currentX);
+                    const nextX = currentX - fVal / fPrimeVal;
+
+                    iterationValues.push({
+                        iteration: i + 1,
+                        x: currentX,
+                        fx: fVal,
+                        fPrimeX: fPrimeVal,
+                        nextX: nextX
+                    });
+
+                    currentX = nextX;
+                }
+                let f_xn = fDisplay
+                    .replace(/(\d*)x/g, '$1x_{n}')
+
+                let f_prime_xn = fPrimeDisplay
+                    .replace(/\bx\b/g, 'x_{n}'); // Đổi x thành x_n
+
+                // First, show the Newton's formula for each iteration
+                iterationHTML += `<div class="math-formula"><p>Newton's iteration formula:</p>`;
+                iterationHTML += `
+                        <p>\\[ x_{n+1} = x_{n} - \\frac{f(x_{n})} {f'(x_{n})} = x_{n} - \\frac{${f_xn}}{${f_prime_xn}} \\]</p>
+                    `;
+                iterationHTML += `</div><br>`;
+
+                // Display iteration process
+                iterationHTML += `<div class="iteration-row" style="font-weight: bold; margin-bottom: 10px;">
+                    <div class="iteration-value" style="flex: 0.5;"> \\(n\\) </div>
+                    <div class="iteration-value"> \\(x_{n+1}\\) </div>
+                </div>`;
+
+                for (const iter of iterationValues) {
+                    iterationHTML += `<div class="iteration-row ">
+                        <div class="iteration-value" style="flex: 0.5;"> \\(x_{${iter.iteration}}\\)</div>
+                        <div class="iteration-value"> \\(${formatNumber(iter.nextX)}\\) </div>
+                    </div>`;
+                }
+
+                document.getElementById('iteration-process').innerHTML = iterationHTML;
+
+                // Calculate error estimation
+                const fPrimeMin = Math.min(Math.abs(fPrime(a)), Math.abs(fPrime(b)));
+                const fDoublePrimeMax = Math.max(Math.abs(fDoublePrime(a)), Math.abs(fDoublePrime(b)));
+
+                let x_temp = 0;
+                let errorEstimation = '';
+                if (iterationValues.length >= 2) {
+                    const last = iterationValues[iterationValues.length - 1];
+                    const prev = iterationValues[iterationValues.length - 2];
+                    const error = (fDoublePrimeMax / (2 * fPrimeMin)) * Math.pow(last.nextX - prev.nextX, 2);
+                    x_temp = last.nextX;
+
+                    errorEstimation = `
+                        <p>Where:</p>
+                        <p>\\[ m = \\min_{[${a},${b}]} |f'(x)| = ${formatNumber(fPrimeMin)} \\]</p>
+                        <p>\\[ M = \\max_{[${a},${b}]} |f''(x)| = ${formatNumber(fDoublePrimeMax)} \\]</p>
+                        <p>Error estimation formula:</p>
+                        <p>\\[ |x_{${iterations}} - x^*| \\leq \\frac{M}{2m} (x_{${iterations}} - x_{${iterations - 1}})^2 \\]</p>
+                        <p>For the last iteration:</p>
+                        <p>\\[ |x_{${iterations}} - x^*| \\leq \\frac{${formatNumber(fDoublePrimeMax)}}{2 \\times ${formatNumber(fPrimeMin)}} (${formatNumber(last.nextX)} - ${formatNumber(prev.nextX)})^2 \\]</p>
+                        <p>\\[ \\approx ${formatNumber(error)} \\]</p>
+                    `;
+                }
+
+                document.getElementById('error-estimation').innerHTML = errorEstimation;
+
+                // Display final result
+                document.getElementById('final-result').innerHTML = `
+                    <div class="success-box">
+                        <h3>Approximate Root Found</h3>
+                        <p style="font-size: 1.3em; text-align: center;">\\[ x \\approx ${formatNumber(x_temp)} \\]</p>
+                        <p>\\[ f(${formatNumber(x_temp)}) \\approx ${formatNumber(math.evaluate(fInput, { x: x_temp }))} \\]</p>
+                    </div>
+                `;
+
+            } catch (e) {
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+                        <h3>Error</h3>
+                        <p>${e.message}</p>
+                        <p>Đã xảy ra lỗi ! Vui lòng Ref và nhập lại</p>
+                    </div>
+                `;
+            }
+
+            // Render MathJax after updating content
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typeset();
+            }
+        }
+    </script>
+</body>
+
+</html>
